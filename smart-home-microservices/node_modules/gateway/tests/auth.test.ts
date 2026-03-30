@@ -23,4 +23,16 @@ describe('Gateway Auth Middleware', () => {
       message: 'Forbidden'
     });
   });
+
+  it('should allow access when user has valid admin token', async () => {
+    const response = await request(app)
+      .get('/api/telemetry')
+      .set('Authorization', 'Bearer valid-admin-token');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      error: false,
+      message: 'Telemetry data fetched successfully'
+    });
+  });
 });

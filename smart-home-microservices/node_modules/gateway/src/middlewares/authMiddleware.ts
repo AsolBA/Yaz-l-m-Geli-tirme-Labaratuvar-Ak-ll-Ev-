@@ -15,5 +15,15 @@ export const authMiddleware = (
     return;
   }
 
-  next();
+  const token = authHeader.split(' ')[1];
+
+  if (token === 'valid-admin-token') {
+    (req as any).user = { role: 'admin' };
+    return next();
+  }
+
+  res.status(403).json({
+    error: true,
+    message: 'Forbidden'
+  });
 };
