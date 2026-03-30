@@ -11,4 +11,16 @@ describe('Gateway Auth Middleware', () => {
       message: 'Unauthorized'
     });
   });
+
+  it('should return 403 when user does not have permission to access telemetry', async () => {
+    const response = await request(app)
+      .get('/api/telemetry')
+      .set('Authorization', 'Bearer fake-token-without-permission');
+
+    expect(response.status).toBe(403);
+    expect(response.body).toEqual({
+      error: true,
+      message: 'Forbidden'
+    });
+  });
 });
