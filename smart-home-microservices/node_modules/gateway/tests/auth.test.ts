@@ -31,8 +31,8 @@ describe('Gateway Auth Middleware', () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
-      error: false,
-      message: 'Telemetry data fetched successfully'
+      service: 'telemetry-service',
+      status: 'ok'
     });
   });
 });

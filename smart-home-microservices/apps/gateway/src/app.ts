@@ -1,5 +1,5 @@
 import express from 'express';
-import telemetryRoutes from './routes/telemetryRoutes';
+import proxyRoutes from './routes/proxyRoutes';
 
 const app = express();
 
@@ -9,6 +9,6 @@ app.get('/health', (_req, res) => {
   res.status(200).json({ service: 'gateway', status: 'ok' });
 });
 
-app.use('/api/telemetry', telemetryRoutes);
+app.use('/api', proxyRoutes);
 
 export default app;
