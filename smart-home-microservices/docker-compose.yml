@@ -1,0 +1,36 @@
+services:
+  auth-service:
+    build:
+      context: .
+      dockerfile: apps/auth-service/Dockerfile
+    ports:
+      - "3001:3001"
+    command: npm run dev
+    working_dir: /app/apps/auth-service
+
+  devicecontrol-service:
+    build:
+      context: .
+      dockerfile: apps/devicecontrol-service/Dockerfile
+    ports:
+      - "3003:3003"
+    command: npm run dev
+    working_dir: /app/apps/devicecontrol-service
+
+  telemetry-service:
+    build:
+      context: .
+      dockerfile: apps/telemetry-service/Dockerfile
+    ports:
+      - "3002:3002"
+    command: npm run dev
+    working_dir: /app/apps/telemetry-service
+
+  gateway:
+    build:
+      context: .
+      dockerfile: apps/gateway/Dockerfile
+    ports:
+      - "3000:3000"
+    command: npm run dev
+    working_dir: /app/apps/gateway

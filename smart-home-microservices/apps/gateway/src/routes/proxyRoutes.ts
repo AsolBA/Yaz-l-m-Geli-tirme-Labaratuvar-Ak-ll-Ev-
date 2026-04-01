@@ -7,7 +7,7 @@ const router = Router();
 router.use(
   '/telemetry',
   authMiddleware,
-  proxy('http://127.0.0.1:3002', {
+  proxy('http://telemetry-service:3002', {
     proxyReqPathResolver: (req) => {
       const path = req.originalUrl.replace('/api/telemetry', '');
       return `/telemetry${path || ''}`;
@@ -18,7 +18,7 @@ router.use(
 router.use(
   '/devices',
   authMiddleware,
-  proxy('http://127.0.0.1:3003', {
+  proxy('http://devicecontrol-service:3003', {
     proxyReqPathResolver: (req) => {
       const path = req.originalUrl.replace('/api/devices', '');
       return `/devices${path || ''}`;
