@@ -25,6 +25,8 @@ services:
       - "3002:3002"
     command: npm run dev
     working_dir: /app/apps/telemetry-service
+    depends_on:
+      - mongodb
 
   gateway:
     build:
@@ -34,3 +36,8 @@ services:
       - "3000:3000"
     command: npm run dev
     working_dir: /app/apps/gateway
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    ports:
+      - "27017:27017"

@@ -1,66 +1,30 @@
-export interface TelemetryRecord {
-  id: string;
-  deviceId: string;
-  temperature: number;
-  humidity: number;
-  energyUsage: number;
-  motionDetected: boolean;
-  timestamp: string;
-}
+import Telemetry from '../models/Telemetry';
 
 class TelemetryService {
-  private records: TelemetryRecord[] = [
-    {
-      id: '1',
-      deviceId: '1',
-      temperature: 24,
-      humidity: 45,
-      energyUsage: 12.5,
-      motionDetected: false,
-      timestamp: new Date().toISOString()
-    },
-    {
-      id: '2',
-      deviceId: '2',
-      temperature: 22,
-      humidity: 40,
-      energyUsage: 9.2,
-      motionDetected: true,
-      timestamp: new Date().toISOString()
-    }
-  ];
-
-  getAll(): TelemetryRecord[] {
-    return this.records;
+  async getAll() {
+    return await Telemetry.find().sort({ createdAt: -1 });
   }
 
-  getById(id: string): TelemetryRecord | undefined {
-    return this.records.find((record) => record.id === id);
+  async getById(id: string) {
+    return await Telemetry.findById(id);
   }
 
-  getByDeviceId(deviceId: string): TelemetryRecord[] {
-    return this.records.filter((record) => record.deviceId === deviceId);
+  async getByDeviceId(deviceId: string) {
+    return await Telemetry.find({ deviceId }).sort({ createdAt: -1 });
   }
 
-  getLatestByDeviceId(deviceId: string): TelemetryRecord | undefined {
-    const deviceRecords = this.getByDeviceId(deviceId);
-
-    if (deviceRecords.length === 0) {
-      return undefined;
-    }
-
-    return deviceRecords[deviceRecords.length - 1];
+  async getLatestByDeviceId(deviceId: string) {
+    return await Telemetry.findOne({ deviceId }).sort({ createdAt: -1 });
   }
 
-  create(data: Omit<TelemetryRecord, 'id' | 'timestamp'>): TelemetryRecord {
-    const newRecord: TelemetryRecord = {
-      id: String(this.records.length + 1),
-      ...data,
-      timestamp: new Date().toISOString()
-    };
-
-    this.records.push(newRecord);
-    return newRecord;
+  async create(data: {
+    deviceId: string;
+    temperature: number;
+    humidity: number;
+    energyUsage: number;
+    motionDetected: boolean;
+  }) {
+    return await Telemetry.create(data);
   }
 }
 

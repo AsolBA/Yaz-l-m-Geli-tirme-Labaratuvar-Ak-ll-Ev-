@@ -1,76 +1,41 @@
-type DeviceType = 'light' | 'thermostat' | 'camera' | 'lock';
-type DeviceStatus = 'on' | 'off';
-
-export interface Device {
-  id: string;
-  name: string;
-  type: DeviceType;
-  status: DeviceStatus;
-  brightness?: number;
-  targetTemperature?: number;
-  locked?: boolean;
-}
+import Device from '../models/Device';
 
 class DeviceService {
-  private devices: Device[] = [
-    {
-      id: '1',
-      name: 'Salon Lambası',
-      type: 'light',
-      status: 'off',
-      brightness: 0
-    },
-    {
-      id: '2',
-      name: 'Yatak Odası Klima',
-      type: 'thermostat',
-      status: 'on',
-      targetTemperature: 22
-    },
-    {
-      id: '3',
-      name: 'Giriş Kapısı Kilidi',
-      type: 'lock',
-      status: 'on',
-      locked: true
-    }
-  ];
-
-  getAll(): Device[] {
-    return this.devices;
+  async getAll() {
+    return await Device.find().sort({ createdAt: -1 });
   }
 
-  getById(id: string): Device | undefined {
-    return this.devices.find((device) => device.id === id);
+  async getById(id: string) {
+    return await Device.findById(id);
   }
 
-  create(deviceData: Omit<Device, 'id'>): Device {
-    const newDevice: Device = {
-      id: String(this.devices.length + 1),
-      ...deviceData
-    };
-
-    this.devices.push(newDevice);
-    return newDevice;
+  async create(deviceData: {
+    name: string;
+    type: 'light' | 'thermostat' | 'camera' | 'lock';
+    status: 'on' | 'off';
+    brightness?: number;
+    targetTemperature?: number;
+    locked?: boolean;
+  }) {
+    return await Device.create(deviceData);
   }
 
-  update(id: string, updateData: Partial<Omit<Device, 'id'>>): Device | null {
-    const device = this.getById(id);
-
-    if (!device) {
-      return null;
-    }
-
-    Object.assign(device, updateData);
-    return device;
-  }
-
-  executeCommand(
+  async update(
     id: string,
-    command: string,
-    value?: number | boolean
-  ): Device | null {
-    const device = this.getById(id);
+    updateData: {
+      name?: string;
+      type?: 'light' | 'thermostat' | 'camera' | 'lock';
+      status?: 'on' | 'off';
+      brightness?: number;
+      targetTemperature?: number;
+      locked?: boolean;
+    }
+  ) {
+    return await Device.findByIdAndUpdate(id, updateData, { new: true });
+  }
+
+  async executeCommand(id: string, command: string, value?: number | boolean) {
+    const device = await Device.findById(id);
 
     if (!device) {
       return null;
@@ -121,6 +86,7 @@ class DeviceService {
         return null;
     }
 
+    await device.save();
     return device;
   }
 }

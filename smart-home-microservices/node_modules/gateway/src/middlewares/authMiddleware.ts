@@ -29,7 +29,7 @@ export const authMiddleware = async (
   const token = parts[1];
 
   try {
-    const response = await axios.post('http://localhost:3001/auth/validate', {
+    const response = await axios.post('http://auth-service:3001/auth/validate', {
       token
     });
 

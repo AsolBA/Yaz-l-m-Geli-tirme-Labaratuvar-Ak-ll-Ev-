@@ -3,8 +3,8 @@ import deviceService from '../services/deviceService';
 
 const router = Router();
 
-router.get('/', (_req: Request, res: Response) => {
-  const devices = deviceService.getAll();
+router.get('/', async (_req: Request, res: Response) => {
+  const devices = await deviceService.getAll();
 
   res.status(200).json({
     error: false,
@@ -12,9 +12,9 @@ router.get('/', (_req: Request, res: Response) => {
   });
 });
 
-router.get('/:id', (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   const id = String(req.params.id);
-  const device = deviceService.getById(id);
+  const device = await deviceService.getById(id);
 
   if (!device) {
     res.status(404).json({
@@ -30,7 +30,7 @@ router.get('/:id', (req: Request, res: Response) => {
   });
 });
 
-router.post('/', (req: Request, res: Response) => {
+router.post('/', async (req: Request, res: Response) => {
   const { name, type, status, brightness, targetTemperature, locked } = req.body;
 
   if (!name || !type || !status) {
@@ -41,7 +41,7 @@ router.post('/', (req: Request, res: Response) => {
     return;
   }
 
-  const newDevice = deviceService.create({
+  const newDevice = await deviceService.create({
     name,
     type,
     status,
@@ -56,9 +56,9 @@ router.post('/', (req: Request, res: Response) => {
   });
 });
 
-router.put('/:id', (req: Request, res: Response) => {
+router.put('/:id', async (req: Request, res: Response) => {
   const id = String(req.params.id);
-  const updatedDevice = deviceService.update(id, req.body);
+  const updatedDevice = await deviceService.update(id, req.body);
 
   if (!updatedDevice) {
     res.status(404).json({
@@ -74,7 +74,7 @@ router.put('/:id', (req: Request, res: Response) => {
   });
 });
 
-router.post('/:id/commands', (req: Request, res: Response) => {
+router.post('/:id/commands', async (req: Request, res: Response) => {
   const id = String(req.params.id);
   const { command, value } = req.body;
 
@@ -86,7 +86,7 @@ router.post('/:id/commands', (req: Request, res: Response) => {
     return;
   }
 
-  const updatedDevice = deviceService.executeCommand(id, command, value);
+  const updatedDevice = await deviceService.executeCommand(id, command, value);
 
   if (!updatedDevice) {
     res.status(400).json({

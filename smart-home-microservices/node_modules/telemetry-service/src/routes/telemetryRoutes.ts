@@ -3,9 +3,9 @@ import telemetryService from '../services/telemetryService';
 
 const router = Router();
 
-router.get('/device/:deviceId/latest', (req: Request, res: Response) => {
+router.get('/device/:deviceId/latest', async (req: Request, res: Response) => {
   const deviceId = String(req.params.deviceId);
-  const record = telemetryService.getLatestByDeviceId(deviceId);
+  const record = await telemetryService.getLatestByDeviceId(deviceId);
 
   if (!record) {
     res.status(404).json({
@@ -21,9 +21,9 @@ router.get('/device/:deviceId/latest', (req: Request, res: Response) => {
   });
 });
 
-router.get('/device/:deviceId', (req: Request, res: Response) => {
+router.get('/device/:deviceId', async (req: Request, res: Response) => {
   const deviceId = String(req.params.deviceId);
-  const records = telemetryService.getByDeviceId(deviceId);
+  const records = await telemetryService.getByDeviceId(deviceId);
 
   res.status(200).json({
     error: false,
@@ -31,9 +31,9 @@ router.get('/device/:deviceId', (req: Request, res: Response) => {
   });
 });
 
-router.get('/:id', (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   const id = String(req.params.id);
-  const record = telemetryService.getById(id);
+  const record = await telemetryService.getById(id);
 
   if (!record) {
     res.status(404).json({
@@ -49,8 +49,8 @@ router.get('/:id', (req: Request, res: Response) => {
   });
 });
 
-router.get('/', (_req: Request, res: Response) => {
-  const records = telemetryService.getAll();
+router.get('/', async (_req: Request, res: Response) => {
+  const records = await telemetryService.getAll();
 
   res.status(200).json({
     error: false,
@@ -58,7 +58,7 @@ router.get('/', (_req: Request, res: Response) => {
   });
 });
 
-router.post('/', (req: Request, res: Response) => {
+router.post('/', async (req: Request, res: Response) => {
   const { deviceId, temperature, humidity, energyUsage, motionDetected } = req.body;
 
   if (
@@ -75,7 +75,7 @@ router.post('/', (req: Request, res: Response) => {
     return;
   }
 
-  const newRecord = telemetryService.create({
+  const newRecord = await telemetryService.create({
     deviceId,
     temperature,
     humidity,
