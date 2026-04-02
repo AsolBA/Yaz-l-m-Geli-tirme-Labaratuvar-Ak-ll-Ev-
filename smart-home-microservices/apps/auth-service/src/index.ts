@@ -1,7 +1,14 @@
 import app from './app';
+import { connectRedis } from './config/redis';
 
 const PORT = process.env.PORT || 3001;
 
-app.listen(PORT, () => {
-  console.log(`Auth service running on port ${PORT}`);
-});
+const startServer = async (): Promise<void> => {
+  await connectRedis();
+
+  app.listen(PORT, () => {
+    console.log(`Auth service running on port ${PORT}`);
+  });
+};
+
+startServer();

@@ -3,7 +3,7 @@ import authService from '../services/authService';
 
 const router = Router();
 
-router.post('/login', (req: Request, res: Response) => {
+router.post('/login', async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -14,7 +14,7 @@ router.post('/login', (req: Request, res: Response) => {
     return;
   }
 
-  const result = authService.login(username, password);
+  const result = await authService.login(username, password);
 
   if (!result) {
     res.status(401).json({
@@ -31,7 +31,7 @@ router.post('/login', (req: Request, res: Response) => {
   });
 });
 
-router.post('/validate', (req: Request, res: Response) => {
+router.post('/validate', async (req: Request, res: Response) => {
   const { token } = req.body;
 
   if (!token) {
@@ -42,7 +42,7 @@ router.post('/validate', (req: Request, res: Response) => {
     return;
   }
 
-  const result = authService.validate(token);
+  const result = await authService.validate(token);
 
   if (!result) {
     res.status(401).json({
@@ -55,7 +55,7 @@ router.post('/validate', (req: Request, res: Response) => {
   res.status(200).json(result);
 });
 
-router.post('/logout', (req: Request, res: Response) => {
+router.post('/logout', async (req: Request, res: Response) => {
   const { token } = req.body;
 
   if (!token) {
@@ -66,7 +66,7 @@ router.post('/logout', (req: Request, res: Response) => {
     return;
   }
 
-  const success = authService.logout(token);
+  const success = await authService.logout(token);
 
   if (!success) {
     res.status(401).json({

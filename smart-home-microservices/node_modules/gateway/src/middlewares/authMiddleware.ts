@@ -5,10 +5,10 @@ export const authMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction
-): Promise<void> => {
+) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader) {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
     res.status(401).json({
       error: true,
       message: 'Unauthorized'
@@ -16,44 +16,27 @@ export const authMiddleware = async (
     return;
   }
 
-  const parts = authHeader.split(' ');
-
-  if (parts.length !== 2 || parts[0] !== 'Bearer') {
-    res.status(401).json({
-      error: true,
-      message: 'Unauthorized'
-    });
-    return;
-  }
-
-  const token = parts[1];
+  const token = authHeader.split(' ')[1];
 
   try {
     const response = await axios.post('http://auth-service:3001/auth/validate', {
       token
     });
 
-    const user = response.data;
-
-    (req as any).user = {
-      userId: user.userId,
-      username: user.username,
-      role: user.role
-    };
-
-    next();
-  } catch (error: any) {
-    if (error.response && error.response.status === 401) {
+    if (!response.data.valid) {
       res.status(401).json({
         error: true,
-        message: 'Unauthorized'
+        message: 'Invalid token'
       });
       return;
     }
 
-    res.status(502).json({
+    (req as any).user = response.data;
+    next();
+  } catch {
+    res.status(401).json({
       error: true,
-      message: 'Auth service unavailable'
+      message: 'Unauthorized'
     });
   }
 };

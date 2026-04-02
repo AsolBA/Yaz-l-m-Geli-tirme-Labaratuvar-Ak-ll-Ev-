@@ -1,4 +1,10 @@
 services:
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+
   auth-service:
     build:
       context: .
@@ -7,6 +13,8 @@ services:
       - "3001:3001"
     command: npm run dev
     working_dir: /app/apps/auth-service
+    depends_on:
+      - redis
 
   devicecontrol-service:
     build:

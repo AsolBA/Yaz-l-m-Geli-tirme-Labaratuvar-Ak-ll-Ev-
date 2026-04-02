@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { redisClient } from '../config/redis';
 
 type UserRole = 'admin' | 'resident' | 'viewer';
 
@@ -37,9 +38,7 @@ class AuthService {
     }
   ];
 
-  private sessions: Map<string, SessionData> = new Map();
-
-  login(username: string, password: string) {
+  async login(username: string, password: string) {
     const user = this.users.find(
       (u) => u.username === username && u.password === password
     );
@@ -50,11 +49,19 @@ class AuthService {
 
     const token = crypto.randomUUID();
 
-    this.sessions.set(token, {
+    const sessionData: SessionData = {
       userId: user.id,
       username: user.username,
       role: user.role
-    });
+    };
+
+    await redisClient.set(
+      `session:${token}`,
+      JSON.stringify(sessionData),
+      {
+        EX: 3600
+      }
+    );
 
     return {
       token,
@@ -62,23 +69,26 @@ class AuthService {
     };
   }
 
-  validate(token: string) {
-    const session = this.sessions.get(token);
+  async validate(token: string) {
+    const session = await redisClient.get(`session:${token}`);
 
     if (!session) {
       return null;
     }
 
+    const parsedSession: SessionData = JSON.parse(session);
+
     return {
       valid: true,
-      userId: session.userId,
-      username: session.username,
-      role: session.role
+      userId: parsedSession.userId,
+      username: parsedSession.username,
+      role: parsedSession.role
     };
   }
 
-  logout(token: string) {
-    return this.sessions.delete(token);
+  async logout(token: string) {
+    const deletedCount = await redisClient.del(`session:${token}`);
+    return deletedCount > 0;
   }
 }
 
