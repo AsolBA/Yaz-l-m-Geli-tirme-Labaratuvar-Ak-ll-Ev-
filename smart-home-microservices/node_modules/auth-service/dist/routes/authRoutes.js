@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const authService_1 = __importDefault(require("../services/authService"));
 const router = (0, express_1.Router)();
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
         res.status(400).json({
@@ -15,7 +15,7 @@ router.post('/login', (req, res) => {
         });
         return;
     }
-    const result = authService_1.default.login(username, password);
+    const result = await authService_1.default.login(username, password);
     if (!result) {
         res.status(401).json({
             error: true,
@@ -29,7 +29,7 @@ router.post('/login', (req, res) => {
         role: result.role
     });
 });
-router.post('/validate', (req, res) => {
+router.post('/validate', async (req, res) => {
     const { token } = req.body;
     if (!token) {
         res.status(400).json({
@@ -38,7 +38,7 @@ router.post('/validate', (req, res) => {
         });
         return;
     }
-    const result = authService_1.default.validate(token);
+    const result = await authService_1.default.validate(token);
     if (!result) {
         res.status(401).json({
             error: true,
@@ -48,7 +48,7 @@ router.post('/validate', (req, res) => {
     }
     res.status(200).json(result);
 });
-router.post('/logout', (req, res) => {
+router.post('/logout', async (req, res) => {
     const { token } = req.body;
     if (!token) {
         res.status(400).json({
@@ -57,7 +57,7 @@ router.post('/logout', (req, res) => {
         });
         return;
     }
-    const success = authService_1.default.logout(token);
+    const success = await authService_1.default.logout(token);
     if (!success) {
         res.status(401).json({
             error: true,

@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const crypto_1 = __importDefault(require("crypto"));
+const redis_1 = require("../config/redis");
 class AuthService {
     constructor() {
         this.users = [
@@ -26,38 +27,42 @@ class AuthService {
                 role: 'viewer'
             }
         ];
-        this.sessions = new Map();
     }
-    login(username, password) {
+    async login(username, password) {
         const user = this.users.find((u) => u.username === username && u.password === password);
         if (!user) {
             return null;
         }
         const token = crypto_1.default.randomUUID();
-        this.sessions.set(token, {
+        const sessionData = {
             userId: user.id,
             username: user.username,
             role: user.role
+        };
+        await redis_1.redisClient.set(`session:${token}`, JSON.stringify(sessionData), {
+            EX: 3600
         });
         return {
             token,
             role: user.role
         };
     }
-    validate(token) {
-        const session = this.sessions.get(token);
+    async validate(token) {
+        const session = await redis_1.redisClient.get(`session:${token}`);
         if (!session) {
             return null;
         }
+        const parsedSession = JSON.parse(session);
         return {
             valid: true,
-            userId: session.userId,
-            username: session.username,
-            role: session.role
+            userId: parsedSession.userId,
+            username: parsedSession.username,
+            role: parsedSession.role
         };
     }
-    logout(token) {
-        return this.sessions.delete(token);
+    async logout(token) {
+        const deletedCount = await redis_1.redisClient.del(`session:${token}`);
+        return deletedCount > 0;
     }
 }
 exports.default = new AuthService();

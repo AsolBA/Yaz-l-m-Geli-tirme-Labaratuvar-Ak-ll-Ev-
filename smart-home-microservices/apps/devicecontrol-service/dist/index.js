@@ -4,12 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = __importDefault(require("./app"));
-const redis_1 = require("./config/redis");
-const PORT = process.env.PORT || 3001;
+const db_1 = require("./config/db");
+const PORT = process.env.PORT || 3003;
 const startServer = async () => {
-    await (0, redis_1.connectRedis)();
+    await (0, db_1.connectDB)();
     app_1.default.listen(PORT, () => {
-        console.log(`Auth service running on port ${PORT}`);
+        console.log(`DeviceControl service running on port ${PORT}`);
     });
 };
 startServer();
