@@ -1,48 +1,48 @@
+version: '3.9'
+
 services:
   redis:
     image: redis:7
     container_name: redis
-    expose:
-      - "6379"
+    ports:
+      - "6379:6379"
 
   mongodb:
     image: mongo:7
     container_name: mongodb
-    expose:
-      - "27017"
+    ports:
+      - "27017:27017"
 
   auth-service:
     build:
       context: .
       dockerfile: apps/auth-service/Dockerfile
+    ports:
+      - "3001:3001"
     command: npm run dev
     working_dir: /app/apps/auth-service
     depends_on:
       - redis
-    expose:
-      - "3001"
 
   devicecontrol-service:
     build:
       context: .
       dockerfile: apps/devicecontrol-service/Dockerfile
+    ports:
+      - "3003:3003"
     command: npm run dev
     working_dir: /app/apps/devicecontrol-service
-    depends_on:
-      - mongodb
-    expose:
-      - "3003"
 
   telemetry-service:
     build:
       context: .
       dockerfile: apps/telemetry-service/Dockerfile
+    ports:
+      - "3002:3002"
     command: npm run dev
     working_dir: /app/apps/telemetry-service
     depends_on:
       - mongodb
-    expose:
-      - "3002"
 
   gateway:
     build:
