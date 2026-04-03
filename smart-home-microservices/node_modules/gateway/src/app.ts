@@ -1,5 +1,6 @@
 import express from 'express';
 import proxyRoutes from './routes/proxyRoutes';
+import authProxyRoutes from './routes/authProxyRoutes';
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.get('/health', (_req, res) => {
   });
 });
 
+app.use('/api/auth', authProxyRoutes);
 app.use('/api', proxyRoutes);
 
 export default app;
