@@ -1,15 +1,11 @@
-version: '3.9'
-
 services:
   redis:
     image: redis:7
-    container_name: redis
     ports:
       - "6379:6379"
 
   mongodb:
     image: mongo:7
-    container_name: mongodb
     ports:
       - "27017:27017"
 
@@ -21,8 +17,6 @@ services:
       - "3001:3001"
     command: npm run dev
     working_dir: /app/apps/auth-service
-    depends_on:
-      - redis
 
   devicecontrol-service:
     build:
@@ -41,8 +35,6 @@ services:
       - "3002:3002"
     command: npm run dev
     working_dir: /app/apps/telemetry-service
-    depends_on:
-      - mongodb
 
   gateway:
     build:
@@ -52,7 +44,13 @@ services:
       - "3000:3000"
     command: npm run dev
     working_dir: /app/apps/gateway
-    depends_on:
-      - auth-service
-      - devicecontrol-service
-      - telemetry-service
+
+  influxdb:
+    image: influxdb:1.8
+    ports:
+      - "8086:8086"
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3005:3000"
