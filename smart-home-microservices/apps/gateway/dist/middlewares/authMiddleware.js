@@ -1,11 +1,8 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authMiddleware = void 0;
-const axios_1 = __importDefault(require("axios"));
-const internalToken_1 = require("../internalToken");
+const HttpAuthTokenValidator_1 = require("../security/HttpAuthTokenValidator");
+const tokenValidator = new HttpAuthTokenValidator_1.HttpAuthTokenValidator();
 const authMiddleware = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -16,28 +13,22 @@ const authMiddleware = async (req, res, next) => {
         return;
     }
     const token = authHeader.split(' ')[1];
-    try {
-        const response = await axios_1.default.post('http://auth-service:3001/auth/validate', { token }, {
-            headers: {
-                ...(0, internalToken_1.internalServiceHeaders)(),
-                'Content-Type': 'application/json'
-            }
+    const outcome = await tokenValidator.validateBearerToken(token);
+    if (outcome.status === 'invalid') {
+        res.status(401).json({
+            error: true,
+            message: 'Invalid token'
         });
-        if (!response.data.valid) {
-            res.status(401).json({
-                error: true,
-                message: 'Invalid token'
-            });
-            return;
-        }
-        req.user = response.data;
-        next();
+        return;
     }
-    catch {
+    if (outcome.status === 'unreachable') {
         res.status(401).json({
             error: true,
             message: 'Unauthorized'
         });
+        return;
     }
+    req.user = outcome.user;
+    next();
 };
 exports.authMiddleware = authMiddleware;

@@ -74,6 +74,29 @@ router.put('/:id', async (req: Request, res: Response) => {
   });
 });
 
+router.delete('/:id', async (req: Request, res: Response) => {
+  const id = String(req.params.id);
+  const result = await deviceService.deleteById(id);
+
+  if (result === 'invalid') {
+    res.status(400).json({
+      error: true,
+      message: 'Invalid device id'
+    });
+    return;
+  }
+
+  if (result === 'not_found') {
+    res.status(404).json({
+      error: true,
+      message: 'Device not found'
+    });
+    return;
+  }
+
+  res.status(204).send();
+});
+
 router.post('/:id/commands', async (req: Request, res: Response) => {
   const id = String(req.params.id);
   const { command, value } = req.body;

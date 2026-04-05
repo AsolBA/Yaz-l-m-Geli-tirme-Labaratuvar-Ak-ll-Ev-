@@ -1,17 +1,3 @@
-import { Request, Response, NextFunction } from 'express';
+import { RoleBasedAccessGate } from '../security/RoleBasedAccessGate';
 
-export const authorizeRoles = (...allowedRoles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    const user = (req as any).user;
-
-    if (!user || !allowedRoles.includes(user.role)) {
-      res.status(403).json({
-        error: true,
-        message: 'Forbidden'
-      });
-      return;
-    }
-
-    next();
-  };
-};
+export const authorizeRoles = RoleBasedAccessGate.middleware;

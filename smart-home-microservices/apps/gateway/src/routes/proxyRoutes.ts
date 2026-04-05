@@ -1,25 +1,11 @@
 import { Router } from 'express';
 import proxy from 'express-http-proxy';
-import http from 'http';
 import { authMiddleware } from '../middlewares/authMiddleware';
 import { authorizeRoles } from '../middlewares/roleMiddleware';
+import { InternalProxyOptionsFactory } from '../proxy/InternalProxyOptionsFactory';
 
 const router = Router();
-
-const internalProxyOpts = {
-  proxyReqOptDecorator: (
-    proxyReqOpts: http.RequestOptions
-  ): http.RequestOptions => {
-    proxyReqOpts.headers = { ...proxyReqOpts.headers };
-    const h = proxyReqOpts.headers as Record<string, string>;
-    const token = process.env.INTERNAL_SERVICE_TOKEN;
-    if (!token?.trim()) {
-      throw new Error('INTERNAL_SERVICE_TOKEN is required');
-    }
-    h['X-Internal-Token'] = token;
-    return proxyReqOpts;
-  }
-};
+const internalProxyOpts = new InternalProxyOptionsFactory().createBaseOptions();
 
 const telemetryPath = (req: { originalUrl: string }) => {
   const path = req.originalUrl.replace('/api/telemetry', '');
@@ -97,6 +83,16 @@ router.put(
     proxyReqPathResolver: (req) => {
       return `/devices/${req.params.id}`;
     }
+  })
+);
+
+router.delete(
+  '/devices/:id',
+  authMiddleware,
+  authorizeRoles('admin'),
+  proxy('http://devicecontrol-service:3003', {
+    ...internalProxyOpts,
+    proxyReqPathResolver: (req) => `/devices/${req.params.id}`
   })
 );
 
