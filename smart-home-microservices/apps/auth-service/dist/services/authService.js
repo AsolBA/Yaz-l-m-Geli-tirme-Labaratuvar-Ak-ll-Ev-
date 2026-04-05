@@ -4,38 +4,44 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const crypto_1 = __importDefault(require("crypto"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const redis_1 = require("../config/redis");
+const User_1 = __importDefault(require("../models/User"));
 class AuthService {
-    constructor() {
-        this.users = [
-            {
-                id: '1',
-                username: 'admin1',
-                password: '123456',
-                role: 'admin'
-            },
-            {
-                id: '2',
-                username: 'resident1',
-                password: '123456',
-                role: 'resident'
-            },
-            {
-                id: '3',
-                username: 'viewer1',
-                password: '123456',
-                role: 'viewer'
-            }
-        ];
+    async register(username, password, role) {
+        const validRoles = ['admin', 'resident', 'viewer'];
+        if (!validRoles.includes(role)) {
+            return { error: 'Invalid role' };
+        }
+        const passwordHash = await bcrypt_1.default.hash(password, 10);
+        try {
+            const created = await User_1.default.create({
+                username,
+                passwordHash,
+                role
+            });
+            return {
+                id: String(created._id),
+                username: created.username,
+                role: created.role
+            };
+        }
+        catch {
+            return { error: 'User already exists' };
+        }
     }
     async login(username, password) {
-        const user = this.users.find((u) => u.username === username && u.password === password);
+        const user = await User_1.default.findOne({ username });
         if (!user) {
+            return null;
+        }
+        const match = await bcrypt_1.default.compare(password, user.passwordHash);
+        if (!match) {
             return null;
         }
         const token = crypto_1.default.randomUUID();
         const sessionData = {
-            userId: user.id,
+            userId: String(user._id),
             username: user.username,
             role: user.role
         };

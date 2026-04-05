@@ -1,14 +1,7 @@
 import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 import { redisClient } from '../config/redis';
-
-type UserRole = 'admin' | 'resident' | 'viewer';
-
-interface User {
-  id: string;
-  username: string;
-  password: string;
-  role: UserRole;
-}
+import User, { UserRole } from '../models/User';
 
 interface SessionData {
   userId: string;
@@ -17,51 +10,56 @@ interface SessionData {
 }
 
 class AuthService {
-  private users: User[] = [
-    {
-      id: '1',
-      username: 'admin1',
-      password: '123456',
-      role: 'admin'
-    },
-    {
-      id: '2',
-      username: 'resident1',
-      password: '123456',
-      role: 'resident'
-    },
-    {
-      id: '3',
-      username: 'viewer1',
-      password: '123456',
-      role: 'viewer'
+  async register(username: string, password: string, role: UserRole) {
+    const validRoles: UserRole[] = ['admin', 'resident', 'viewer'];
+
+    if (!validRoles.includes(role)) {
+      return { error: 'Invalid role' as const };
     }
-  ];
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    try {
+      const created = await User.create({
+        username,
+        passwordHash,
+        role
+      });
+
+      return {
+        id: String(created._id),
+        username: created.username,
+        role: created.role
+      };
+    } catch {
+      return { error: 'User already exists' as const };
+    }
+  }
 
   async login(username: string, password: string) {
-    const user = this.users.find(
-      (u) => u.username === username && u.password === password
-    );
+    const user = await User.findOne({ username });
 
     if (!user) {
+      return null;
+    }
+
+    const match = await bcrypt.compare(password, user.passwordHash);
+
+    if (!match) {
       return null;
     }
 
     const token = crypto.randomUUID();
 
     const sessionData: SessionData = {
-      userId: user.id,
+      userId: String(user._id),
       username: user.username,
-      role: user.role
+      role: user.role as UserRole
     };
 
-    await redisClient.set(
-      `session:${token}`,
-      JSON.stringify(sessionData),
-      {
-        EX: 3600
-      }
-    );
+    await redisClient.set(`session:${token}`, JSON.stringify(sessionData), {
+      EX: 3600
+    });
 
     return {
       token,

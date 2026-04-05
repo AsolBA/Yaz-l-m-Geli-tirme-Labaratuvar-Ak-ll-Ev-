@@ -9,6 +9,8 @@
   "scripts": {
     "test": "npm run test --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
-    "dev": "npm run dev --workspace=apps/gateway"
+    "dev": "npm run dev --workspace=apps/gateway",
+    "k6": "k6 run load-test.js",
+    "k6:influx": "k6 run --out influxdb=http://localhost:8086/k6 load-test.js"
   }
 }

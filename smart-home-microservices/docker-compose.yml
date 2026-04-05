@@ -13,8 +13,12 @@ services:
     build:
       context: .
       dockerfile: apps/auth-service/Dockerfile
-    ports:
-      - "3001:3001"
+    environment:
+      INTERNAL_SERVICE_TOKEN: dev-gateway-internal-secret
+      MONGODB_URI: mongodb://mongodb:27017/authdb
+    depends_on:
+      - mongodb
+      - redis
     command: npm run dev
     working_dir: /app/apps/auth-service
 
@@ -22,8 +26,10 @@ services:
     build:
       context: .
       dockerfile: apps/devicecontrol-service/Dockerfile
-    ports:
-      - "3003:3003"
+    environment:
+      INTERNAL_SERVICE_TOKEN: dev-gateway-internal-secret
+    depends_on:
+      - mongodb
     command: npm run dev
     working_dir: /app/apps/devicecontrol-service
 
@@ -31,8 +37,10 @@ services:
     build:
       context: .
       dockerfile: apps/telemetry-service/Dockerfile
-    ports:
-      - "3002:3002"
+    environment:
+      INTERNAL_SERVICE_TOKEN: dev-gateway-internal-secret
+    depends_on:
+      - mongodb
     command: npm run dev
     working_dir: /app/apps/telemetry-service
 
@@ -42,6 +50,12 @@ services:
       dockerfile: apps/gateway/Dockerfile
     ports:
       - "3000:3000"
+    environment:
+      INTERNAL_SERVICE_TOKEN: dev-gateway-internal-secret
+    depends_on:
+      - auth-service
+      - devicecontrol-service
+      - telemetry-service
     command: npm run dev
     working_dir: /app/apps/gateway
 
@@ -49,8 +63,19 @@ services:
     image: influxdb:1.8
     ports:
       - "8086:8086"
+    environment:
+      INFLUXDB_DB: k6
 
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:10.4.3
     ports:
       - "3005:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - influxdb

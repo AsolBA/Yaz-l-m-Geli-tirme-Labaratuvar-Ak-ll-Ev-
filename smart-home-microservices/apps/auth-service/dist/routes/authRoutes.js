@@ -6,6 +6,29 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const authService_1 = __importDefault(require("../services/authService"));
 const router = (0, express_1.Router)();
+router.post('/register', async (req, res) => {
+    const { username, password, role } = req.body;
+    if (!username || !password || !role) {
+        res.status(400).json({
+            error: true,
+            message: 'Username, password and role are required'
+        });
+        return;
+    }
+    const result = await authService_1.default.register(username, password, role);
+    if ('error' in result) {
+        res.status(400).json({
+            error: true,
+            message: result.error
+        });
+        return;
+    }
+    res.status(201).json({
+        error: false,
+        message: 'User registered successfully',
+        user: result
+    });
+});
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {

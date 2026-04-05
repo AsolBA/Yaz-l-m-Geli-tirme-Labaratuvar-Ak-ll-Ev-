@@ -3,6 +3,34 @@ import authService from '../services/authService';
 
 const router = Router();
 
+router.post('/register', async (req: Request, res: Response) => {
+  const { username, password, role } = req.body;
+
+  if (!username || !password || !role) {
+    res.status(400).json({
+      error: true,
+      message: 'Username, password and role are required'
+    });
+    return;
+  }
+
+  const result = await authService.register(username, password, role);
+
+  if ('error' in result) {
+    res.status(400).json({
+      error: true,
+      message: result.error
+    });
+    return;
+  }
+
+  res.status(201).json({
+    error: false,
+    message: 'User registered successfully',
+    user: result
+  });
+});
+
 router.post('/login', async (req: Request, res: Response) => {
   const { username, password } = req.body;
 

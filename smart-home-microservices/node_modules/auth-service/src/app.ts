@@ -1,5 +1,6 @@
 import express from 'express';
 import authRoutes from './routes/authRoutes';
+import { requireInternalService } from './middlewares/requireInternalService';
 
 const app = express();
 
@@ -12,6 +13,6 @@ app.get('/health', (_req, res) => {
   });
 });
 
-app.use('/auth', authRoutes);
+app.use('/auth', requireInternalService, authRoutes);
 
 export default app;

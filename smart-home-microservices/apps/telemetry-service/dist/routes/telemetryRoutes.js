@@ -29,21 +29,6 @@ router.get('/device/:deviceId', async (req, res) => {
         data: records
     });
 });
-router.get('/:id', async (req, res) => {
-    const id = String(req.params.id);
-    const record = await telemetryService_1.default.getById(id);
-    if (!record) {
-        res.status(404).json({
-            error: true,
-            message: 'Telemetry record not found'
-        });
-        return;
-    }
-    res.status(200).json({
-        error: false,
-        data: record
-    });
-});
 router.get('/', async (_req, res) => {
     const records = await telemetryService_1.default.getAll();
     res.status(200).json({
@@ -75,5 +60,79 @@ router.post('/', async (req, res) => {
         error: false,
         data: newRecord
     });
+});
+router.get('/:id', async (req, res) => {
+    const id = String(req.params.id);
+    const record = await telemetryService_1.default.getById(id);
+    if (!record) {
+        res.status(404).json({
+            error: true,
+            message: 'Telemetry record not found'
+        });
+        return;
+    }
+    res.status(200).json({
+        error: false,
+        data: record
+    });
+});
+router.put('/:id', async (req, res) => {
+    const id = String(req.params.id);
+    const { deviceId, temperature, humidity, energyUsage, motionDetected } = req.body;
+    if (!deviceId ||
+        temperature === undefined ||
+        humidity === undefined ||
+        energyUsage === undefined ||
+        motionDetected === undefined) {
+        res.status(400).json({
+            error: true,
+            message: 'deviceId, temperature, humidity, energyUsage and motionDetected are required'
+        });
+        return;
+    }
+    const updated = await telemetryService_1.default.replaceById(id, {
+        deviceId,
+        temperature,
+        humidity,
+        energyUsage,
+        motionDetected
+    });
+    if (updated === 'invalid_id') {
+        res.status(400).json({
+            error: true,
+            message: 'Invalid telemetry id'
+        });
+        return;
+    }
+    if (updated === 'not_found') {
+        res.status(404).json({
+            error: true,
+            message: 'Telemetry record not found'
+        });
+        return;
+    }
+    res.status(200).json({
+        error: false,
+        data: updated
+    });
+});
+router.delete('/:id', async (req, res) => {
+    const id = String(req.params.id);
+    const result = await telemetryService_1.default.deleteById(id);
+    if (result === 'invalid') {
+        res.status(400).json({
+            error: true,
+            message: 'Invalid telemetry id'
+        });
+        return;
+    }
+    if (result === 'not_found') {
+        res.status(404).json({
+            error: true,
+            message: 'Telemetry record not found'
+        });
+        return;
+    }
+    res.status(204).send();
 });
 exports.default = router;

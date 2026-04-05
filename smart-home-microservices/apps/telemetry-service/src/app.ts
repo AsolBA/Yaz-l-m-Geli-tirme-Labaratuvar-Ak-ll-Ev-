@@ -1,5 +1,6 @@
 import express from 'express';
 import telemetryRoutes from './routes/telemetryRoutes';
+import { requireInternalService } from './middlewares/requireInternalService';
 
 const app = express();
 
@@ -12,6 +13,6 @@ app.get('/health', (_req, res) => {
   });
 });
 
-app.use('/telemetry', telemetryRoutes);
+app.use('/telemetry', requireInternalService, telemetryRoutes);
 
 export default app;

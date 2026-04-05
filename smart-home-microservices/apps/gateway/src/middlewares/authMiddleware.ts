@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
+import { internalServiceHeaders } from '../internalToken';
 
 export const authMiddleware = async (
   req: Request,
@@ -19,9 +20,16 @@ export const authMiddleware = async (
   const token = authHeader.split(' ')[1];
 
   try {
-    const response = await axios.post('http://auth-service:3001/auth/validate', {
-      token
-    });
+    const response = await axios.post(
+      'http://auth-service:3001/auth/validate',
+      { token },
+      {
+        headers: {
+          ...internalServiceHeaders(),
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
     if (!response.data.valid) {
       res.status(401).json({
