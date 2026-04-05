@@ -324,14 +324,6 @@ npm run k6:influx
 
 ## 6. Gözlemlenebilirlik: Grafana ve log tablosu
 
-Ödev metni, Dispatcher trafiğinin **grafiksel arayüz** (Grafana vb.) ile sunulmasını ve **detaylı log tablosu** ile desteklenmesini ister.
-
-- **Prometheus:** Gateway `GET /metrics` uç noktasını periyodik çeker (`infra/prometheus/prometheus.yml` içinde `gateway:3000`).
-- **Loki + Promtail:** `infra/logs/gateway-access.log` dosyası ve (Docker socket erişimi olan ortamlarda) konteyner logları; Grafana **Explore** → **Loki** ile **tablo** görünümünde satır satır sorgulanabilir.
-- **Grafana:** Üç veri kaynağı provision edilir: **InfluxDB (k6)**, **Prometheus**, **Loki**. **Önemli:** Hazır içe aktarılan JSON dashboard yalnızca **K6** klasöründedir (`k6-gateway.json`). Gateway trafik grafiği için **Explore → Prometheus** ile örneğin histogram `gateway_http_request_duration_seconds` veya `gateway_instance_info` üzerinden panel oluşturup kaydedin; **Yer 5** ekran görüntüsü bununla alınabilir.
-
-Aşağıdaki **ekran görüntüsü** bölümlerine kendi görüntülerinizi ekleyin (repoya `screenshots/` klasörü koyup Markdown görsel satırlarını kullanabilirsiniz). **Yer 5** grafik/metrik, **Yer 5b** log tablosu (Explore) için ayrılmıştır.
-
 ---
 
 ## 7. Test senaryoları ve sonuçlar
@@ -353,16 +345,8 @@ Script: `load-test.js`. Aşamalar: **50 → 100 → 200 → 500** eşzamanlı ku
 
 Özet çıktı tam kademeli koşuda `k6-summary.json` dosyasına yazılır. **README tablosundaki her satır** (50 / 100 / 200 / 500) için ayrı ölçüm gerekir; `load-test.js` içinde `K6_TIER` ortam değişkeni ile sabit VU modu kullanılır (her kademe ~90 sn).
 
-**Tabloyu doldurma:** Docker stack ayaktayken proje kökünde:
 
-```bash
-npm run k6:tiers
-npm run k6:table
-```
-
-`k6:table` komutu, `k6-summary-tier-50.json` … `500.json` dosyalarından üretilen Markdown satırlarını terminale yazar; aşağıdaki tablonun gövdesine yapıştırın. (Tek başına tam kademeli `npm run k6` özeti tüm aşamaları birleştirir; satır satır tablo için `k6:tiers` şarttır.)
-
-#### Tablo — k6 sonuçları (`npm run k6:table` çıktısı ile doldurun)
+#### Tablo — k6 sonuçları 
 
 | Eşzamanlı kullanıcı (yaklaşık) | Ortalama yanıt süresi (ms) | p(95) (ms) | Hata oranı (%) | Not |
 |-------------------------------|----------------------------|------------|----------------|-----|
