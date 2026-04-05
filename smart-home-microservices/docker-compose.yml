@@ -1,9 +1,18 @@
+networks:
+  smart_home_net:
+    name: smart_home_net
+    driver: bridge
+
 services:
   redis:
     image: redis:7
+    networks:
+      - smart_home_net
 
   mongodb:
     image: mongo:7
+    networks:
+      - smart_home_net
 
   auth-service:
     build:
@@ -17,6 +26,8 @@ services:
       - redis
     command: npm run dev
     working_dir: /app/apps/auth-service
+    networks:
+      - smart_home_net
 
   devicecontrol-service:
     build:
@@ -28,6 +39,8 @@ services:
       - mongodb
     command: npm run dev
     working_dir: /app/apps/devicecontrol-service
+    networks:
+      - smart_home_net
 
   telemetry-service:
     build:
@@ -39,6 +52,8 @@ services:
       - mongodb
     command: npm run dev
     working_dir: /app/apps/telemetry-service
+    networks:
+      - smart_home_net
 
   gateway:
     build:
@@ -48,12 +63,62 @@ services:
       - "3000:3000"
     environment:
       INTERNAL_SERVICE_TOKEN: dev-gateway-internal-secret
+      ACCESS_LOG_DIR: /logs
+    volumes:
+      - ./infra/logs:/logs
     depends_on:
       - auth-service
       - devicecontrol-service
       - telemetry-service
     command: npm run dev
     working_dir: /app/apps/gateway
+    networks:
+      - smart_home_net
+
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    # Host 9099: Windows'ta 9090 başka uygulama (başka Prometheus vb.) kullanıyorsa çakışmayı önler
+    ports:
+      - "9099:9090"
+    volumes:
+      - prometheus_data:/prometheus
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    depends_on:
+      - gateway
+    restart: unless-stopped
+    networks:
+      - smart_home_net
+
+  loki:
+    image: grafana/loki:2.9.8
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./infra/loki/loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+    networks:
+      - smart_home_net
+
+  promtail:
+    image: grafana/promtail:2.9.8
+    user: root
+    volumes:
+      - ./infra/promtail/promtail-config.yaml:/etc/promtail/config.yml:ro
+      - ./infra/logs:/logs:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+      - gateway
+    networks:
+      - smart_home_net
 
   influxdb:
     image: influxdb:1.8
@@ -61,6 +126,9 @@ services:
       - "8086:8086"
     environment:
       INFLUXDB_DB: k6
+    restart: unless-stopped
+    networks:
+      - smart_home_net
 
   grafana:
     image: grafana/grafana:10.4.3
@@ -75,3 +143,13 @@ services:
       - ./infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
     depends_on:
       - influxdb
+      - prometheus
+      - loki
+      - promtail
+    restart: unless-stopped
+    networks:
+      - smart_home_net
+
+volumes:
+  loki_data:
+  prometheus_data:

@@ -1,0 +1,2 @@
+infra/logs/*.log
+!infra/logs/.gitkeep

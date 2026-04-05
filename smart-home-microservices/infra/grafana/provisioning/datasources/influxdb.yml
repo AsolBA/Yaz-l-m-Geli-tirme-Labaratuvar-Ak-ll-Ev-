@@ -7,5 +7,10 @@ datasources:
     access: proxy
     url: http://influxdb:8086
     database: k6
+    user: ''
+    jsonData:
+      version: InfluxQL
+      httpMode: GET
+      dbName: k6
     isDefault: true
     editable: false

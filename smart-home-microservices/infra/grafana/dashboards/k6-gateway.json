@@ -157,7 +157,7 @@
   "schemaVersion": 39,
   "tags": ["k6", "gateway", "yazlab"],
   "templating": { "list": [] },
-  "time": { "from": "now-30m", "to": "now" },
+  "time": { "from": "now-6h", "to": "now" },
   "timepicker": {},
   "timezone": "browser",
   "title": "k6 - API Gateway yük testi",

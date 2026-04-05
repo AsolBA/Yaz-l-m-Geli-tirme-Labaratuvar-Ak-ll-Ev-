@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import axios from 'axios';
-import { internalServiceHeaders } from '../internalToken';
+import { HttpAuthTokenValidator } from '../security/HttpAuthTokenValidator';
+
+const tokenValidator = new HttpAuthTokenValidator();
 
 export const authMiddleware = async (
   req: Request,
@@ -18,33 +19,24 @@ export const authMiddleware = async (
   }
 
   const token = authHeader.split(' ')[1];
+  const outcome = await tokenValidator.validateBearerToken(token);
 
-  try {
-    const response = await axios.post(
-      'http://auth-service:3001/auth/validate',
-      { token },
-      {
-        headers: {
-          ...internalServiceHeaders(),
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+  if (outcome.status === 'invalid') {
+    res.status(401).json({
+      error: true,
+      message: 'Invalid token'
+    });
+    return;
+  }
 
-    if (!response.data.valid) {
-      res.status(401).json({
-        error: true,
-        message: 'Invalid token'
-      });
-      return;
-    }
-
-    (req as any).user = response.data;
-    next();
-  } catch {
+  if (outcome.status === 'unreachable') {
     res.status(401).json({
       error: true,
       message: 'Unauthorized'
     });
+    return;
   }
+
+  (req as Request & { user: unknown }).user = outcome.user;
+  next();
 };

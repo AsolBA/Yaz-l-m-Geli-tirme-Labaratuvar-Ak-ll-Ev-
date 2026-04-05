@@ -7,19 +7,9 @@ const express_1 = require("express");
 const express_http_proxy_1 = __importDefault(require("express-http-proxy"));
 const authMiddleware_1 = require("../middlewares/authMiddleware");
 const roleMiddleware_1 = require("../middlewares/roleMiddleware");
+const InternalProxyOptionsFactory_1 = require("../proxy/InternalProxyOptionsFactory");
 const router = (0, express_1.Router)();
-const internalProxyOpts = {
-    proxyReqOptDecorator: (proxyReqOpts) => {
-        proxyReqOpts.headers = { ...proxyReqOpts.headers };
-        const h = proxyReqOpts.headers;
-        const token = process.env.INTERNAL_SERVICE_TOKEN;
-        if (!token?.trim()) {
-            throw new Error('INTERNAL_SERVICE_TOKEN is required');
-        }
-        h['X-Internal-Token'] = token;
-        return proxyReqOpts;
-    }
-};
+const internalProxyOpts = new InternalProxyOptionsFactory_1.InternalProxyOptionsFactory().createBaseOptions();
 const telemetryPath = (req) => {
     const path = req.originalUrl.replace('/api/telemetry', '');
     return `/telemetry${path || ''}`;
@@ -55,6 +45,10 @@ router.put('/devices/:id', authMiddleware_1.authMiddleware, (0, roleMiddleware_1
     proxyReqPathResolver: (req) => {
         return `/devices/${req.params.id}`;
     }
+}));
+router.delete('/devices/:id', authMiddleware_1.authMiddleware, (0, roleMiddleware_1.authorizeRoles)('admin'), (0, express_http_proxy_1.default)('http://devicecontrol-service:3003', {
+    ...internalProxyOpts,
+    proxyReqPathResolver: (req) => `/devices/${req.params.id}`
 }));
 router.post('/devices/:id/commands', authMiddleware_1.authMiddleware, (0, roleMiddleware_1.authorizeRoles)('admin', 'resident'), (0, express_http_proxy_1.default)('http://devicecontrol-service:3003', {
     ...internalProxyOpts,

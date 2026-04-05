@@ -1,0 +1,11 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    uid: prometheus-ds
+    type: prometheus
+    access: proxy
+    # Compose servis adı (aynı ağ: smart_home_net)
+    url: http://prometheus:9090
+    isDefault: false
+    editable: true
