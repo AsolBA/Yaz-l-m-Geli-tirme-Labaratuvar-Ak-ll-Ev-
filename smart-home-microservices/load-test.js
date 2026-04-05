@@ -10,31 +10,56 @@
  *   k6 run --out influxdb=http://localhost:8086/k6 load-test.js
  *
  * Özet JSON (rapor için): test bitince k6-summary.json oluşur (Influx modunda da).
+ *
+ * README tablosu için tek kademe ölçümü (sabit VU, ~90 sn):
+ *   set K6_TIER=50&& k6 run load-test.js
+ *   (PowerShell: $env:K6_TIER='50'; k6 run load-test.js)
+ * Çıktı: k6-summary-tier-50.json (100/200/500 için aynı)
  */
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
-export const options = {
-  stages: [
-    { duration: '30s', target: 50 },
-    { duration: '1m', target: 50 },
-    { duration: '30s', target: 100 },
-    { duration: '1m', target: 100 },
-    { duration: '30s', target: 200 },
-    { duration: '1m', target: 200 },
-    { duration: '30s', target: 500 },
-    { duration: '1m', target: 500 },
-    { duration: '30s', target: 0 }
-  ],
-  thresholds: {
-    http_req_failed: ['rate<0.10'],
-    http_req_duration: ['p(95)<5000']
-  }
+const tierEnv = __ENV.K6_TIER;
+const tierVus = tierEnv ? parseInt(tierEnv, 10) : NaN;
+const tierMode = Number.isFinite(tierVus) && tierVus > 0;
+
+const thresholds = {
+  http_req_failed: ['rate<0.10'],
+  http_req_duration: ['p(95)<5000']
 };
 
+export const options = tierMode
+  ? {
+      scenarios: {
+        steady: {
+          executor: 'constant-vus',
+          vus: tierVus,
+          duration: '90s'
+        }
+      },
+      thresholds
+    }
+  : {
+      stages: [
+        { duration: '30s', target: 50 },
+        { duration: '1m', target: 50 },
+        { duration: '30s', target: 100 },
+        { duration: '1m', target: 100 },
+        { duration: '30s', target: 200 },
+        { duration: '1m', target: 200 },
+        { duration: '30s', target: 500 },
+        { duration: '1m', target: 500 },
+        { duration: '30s', target: 0 }
+      ],
+      thresholds
+    };
+
 export function handleSummary(data) {
+  const summaryFile = tierMode
+    ? `k6-summary-tier-${tierEnv}.json`
+    : 'k6-summary.json';
   return {
-    'k6-summary.json': JSON.stringify(data, null, 2),
+    [summaryFile]: JSON.stringify(data, null, 2),
     stdout: defaultTextSummary(data)
   };
 }

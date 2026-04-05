@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Device from '../models/Device';
 
 class DeviceService {
@@ -88,6 +89,20 @@ class DeviceService {
 
     await device.save();
     return device;
+  }
+
+  async deleteById(id: string) {
+    if (!mongoose.isValidObjectId(id)) {
+      return 'invalid' as const;
+    }
+
+    const deleted = await Device.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return 'not_found' as const;
+    }
+
+    return 'ok' as const;
   }
 }
 
