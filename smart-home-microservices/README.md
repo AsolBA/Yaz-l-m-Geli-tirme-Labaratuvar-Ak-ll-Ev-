@@ -346,7 +346,6 @@ Aşağıdaki **ekran görüntüsü** bölümlerine kendi görüntülerinizi ekle
 | `/api/devices` ve telemetri yönlendirme | 200, doğru servis | `proxy.test.ts` |
 | Ulaşılamayan servis | 502 | `proxy-error.test.ts` |
 
-*Not: Ödev metninde istenen üzere Dispatcher test dosyalarının geliştirme sürecinde **işlevsel koddan önce** yazılmış olması gerekir; teslimde bu sıra Git geçmişi ile gösterilmelidir.*
 
 ### 7.2 Yük testi (k6)
 
@@ -367,10 +366,10 @@ npm run k6:table
 
 | Eşzamanlı kullanıcı (yaklaşık) | Ortalama yanıt süresi (ms) | p(95) (ms) | Hata oranı (%) | Not |
 |-------------------------------|----------------------------|------------|----------------|-----|
-| 50 | *[doldur]* | *[doldur]* | *[doldur]* | *[doldur]* |
-| 100 | *[doldur]* | *[doldur]* | *[doldur]* | *[doldur]* |
-| 200 | *[doldur]* | *[doldur]* | *[doldur]* | *[doldur]* |
-| 500 | *[doldur]* | *[doldur]* | *[doldur]* | *[doldur]* |
+| 50 | *[16556]* | *[545.16]* | *[250.94]* | *[0]* |
+| 100 | *[16248]* | *[1114.65]* | *[846.50]* | *[0]* |
+| 200 | *[16733]* | *[1973.13]* | *[2030.61]* | *[0]* |
+| 500 | *[17036]* | *[5335.21]* | *[5551.37]* | *[0]* |
 
 ---
 
@@ -401,9 +400,7 @@ npm run k6:table
 
 ---
 
-## Ekran görüntüsü yerleri *(buraya yapıştırın / dosya yolu verin)*
-
-Aşağıdaki her blokta **tek bir görsel** için yer vardır. Kullanım: projede `screenshots` klasörü oluşturup `![kısa açıklama](screenshots/XX-adi.png)` şeklinde ekleyebilir veya GitHub arayüzünde dosyayı yükleyip bağlantıyı kullanabilirsiniz.
+## Ekran görüntüsü yerleri 
 
 ---
 
@@ -411,7 +408,8 @@ Aşağıdaki her blokta **tek bir görsel** için yer vardır. Kullanım: projed
 
 <!-- SCREENSHOT: docker-compose-up -->
 
-![Docker Compose - tüm konteynerler ayakta](screenshots/01-docker-compose.png)
+<img width="907" height="662" alt="docker" src="https://github.com/user-attachments/assets/484f2433-0814-481c-9424-cf6cd63f15bb" />
+
 
 ---
 
@@ -419,7 +417,8 @@ Aşağıdaki her blokta **tek bir görsel** için yer vardır. Kullanım: projed
 
 <!-- SCREENSHOT: gateway-health -->
 
-![Gateway health veya tek port erişimi](screenshots/02-gateway-health.png)
+<img width="897" height="690" alt="postmn" src="https://github.com/user-attachments/assets/dcf162fc-88c8-47e1-938d-d0ab42ed01db" />
+
 
 ---
 
@@ -427,15 +426,16 @@ Aşağıdaki her blokta **tek bir görsel** için yer vardır. Kullanım: projed
 
 <!-- SCREENSHOT: network-isolation -->
 
-![Doğrudan mikroservis erişiminin reddi / sadece gateway](screenshots/03-network-isolation.png)
+---<img width="918" height="792" alt="izolsyn" src="https://github.com/user-attachments/assets/9fc50b6e-f7f8-447a-93fd-778ee8e1e757" />
 
----
 
 ### 📷 Yer 4 — Login ve Bearer token ile korumalı istek (Postman veya benzeri)
 
 <!-- SCREENSHOT: auth-flow -->
 
-![Login ve Authorization Bearer ile API çağrısı](screenshots/04-auth-api.png)
+<img width="891" height="742" alt="uth1" src="https://github.com/user-attachments/assets/cd44beba-aed0-42f6-801f-20ebf9df7155" />
+<img width="882" height="903" alt="uth2" src="https://github.com/user-attachments/assets/e513d1ca-778b-4832-bd09-34017d309e8d" />
+
 
 ---
 
@@ -443,7 +443,8 @@ Aşağıdaki her blokta **tek bir görsel** için yer vardır. Kullanım: projed
 
 <!-- SCREENSHOT: grafana-metrics-chart -->
 
-![Grafana - metrik / trafik grafiği](screenshots/05-grafana-traffic.png)
+![WhatsApp Image 2026-04-05 at 23 49 42 (2)](https://github.com/user-attachments/assets/2eb555b5-32c4-412f-9340-32281d5430ec)
+
 
 ---
 
@@ -451,7 +452,8 @@ Aşağıdaki her blokta **tek bir görsel** için yer vardır. Kullanım: projed
 
 <!-- SCREENSHOT: grafana-loki-log-table -->
 
-![Grafana - Loki log tablosu](screenshots/05b-grafana-log-table.png)
+![WhatsApp Image 2026-04-05 at 23 49 42](https://github.com/user-attachments/assets/1b86e403-13f8-423d-aa53-a21e2b49039d)
+
 
 ---
 
@@ -459,7 +461,8 @@ Aşağıdaki her blokta **tek bir görsel** için yer vardır. Kullanım: projed
 
 <!-- SCREENSHOT: grafana-k6 -->
 
-![Grafana - k6 yük testi sonuçları](screenshots/06-grafana-k6.png)
+![WhatsApp Image 2026-04-05 at 23 49 42 (1)](https://github.com/user-attachments/assets/17a1db64-5eb8-4200-bbb5-0c29d9ae81dc)
+
 
 ---
 
@@ -467,7 +470,8 @@ Aşağıdaki her blokta **tek bir görsel** için yer vardır. Kullanım: projed
 
 <!-- SCREENSHOT: k6-console-or-json -->
 
-![k6 konsol özeti veya özet JSON](screenshots/07-k6-summary.png)
+![WhatsApp Image 2026-04-05 at 23 49 52](https://github.com/user-attachments/assets/d0d1e0b1-4779-45fd-a8d5-be8492c69595)
+
 
 ---
 
@@ -475,25 +479,12 @@ Aşağıdaki her blokta **tek bir görsel** için yer vardır. Kullanım: projed
 
 <!-- SCREENSHOT: jest-gateway -->
 
-![Jest - Gateway testleri geçiyor](screenshots/08-jest-gateway.png)
+<img width="898" height="831" alt="8" src="https://github.com/user-attachments/assets/f755d8ac-88d4-420d-9be4-e42538be405c" />
+
 
 ---
 
-### 📷 Yer 9 — (İsteğe bağlı) MongoDB Compass veya `mongosh` ile koleksiyon örneği (veri izolasyonu)
 
-<!-- SCREENSHOT: mongodb-example -->
-
-![MongoDB - örnek veri](screenshots/09-mongodb.png)
-
----
-
-### 📷 Yer 10 — (İsteğe bağlı) Redis içinde oturum anahtarı örneği (`session:...`)
-
-<!-- SCREENSHOT: redis-session -->
-
-![Redis - oturum kaydı](screenshots/10-redis-session.png)
-
----
 
 ## Ekler ve kaynaklar
 
